@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Historiales Clínicos Registrados — DentalCare Pro{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Fichas Clínicas Atendidas</h1>
+    <a href="{% url 'fichas:crear_ficha' %}" class="btn btn--primary">
+        + Registrar Atención
+    </a>
+</div>
+
+{% if fichas %}
+<div class="table-container">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Paciente</th>
+                <th>Fecha</th>
+                <th>Diagnóstico</th>
+                <th>Tratamiento</th>
+                <th>Observaciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for ficha in fichas %}
+            <tr>
+                <td><strong>{{ ficha.paciente.get_full_name }}</strong></td>
+                <td>{{ ficha.fecha|date:"d/m/Y" }}</td>
+                <td>{{ ficha.diagnostico|linebreaks }}</td>
+                <td>{{ ficha.tratamiento_realizado|linebreaks }}</td>
+                <td>{{ ficha.observaciones|default:"-"|linebreaks }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="empty-state">
+    <div class="empty-state__icon" aria-hidden="true">📋</div>
+    <h2 class="empty-state__title">Sin Registros Médicos</h2>
+    <p class="empty-state__desc">Aún no ha registrado atenciones clínicas para ningún paciente.</p>
+    <a href="{% url 'fichas:crear_ficha' %}" class="btn btn--primary">Crear primera ficha</a>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}Aprobar Cita #{{ cita.pk }} — DentalCare Pro{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Revisión de Cita #{{ cita.pk }}</h1>
+    <a href="{% url 'citas:citas_revision' %}" class="btn btn--outline">← Volver</a>
+</div>
+
+<div class="detail-grid">
+    <!-- Detalle de la cita -->
+    <div class="card">
+        <div class="card__header">
+            <h2 class="card__title">Información de la Cita</h2>
+        </div>
+        <div class="card__body">
+            <dl class="detail-list">
+                <dt>Paciente</dt>
+                <dd>{{ cita.paciente.get_full_name }}</dd>
+                <dt>Odontólogo</dt>
+                <dd>Dr. {{ cita.doctor.get_full_name }}</dd>
+                <dt>Fecha</dt>
+                <dd>{{ cita.fecha|date:"d/m/Y" }}</dd>
+                <dt>Hora</dt>
+                <dd>{{ cita.hora|time:"H:i" }}</dd>
+                <dt>Estado actual</dt>
+                <dd><span class="badge badge--en_revision">{{ cita.get_estado_display }}</span></dd>
+                <dt>Fecha de transacción</dt>
+                <dd>{{ cita.fecha_transaccion|default:"No especificada" }}</dd>
+            </dl>
+        </div>
+    </div>
+
+    <!-- Comprobante de pago -->
+    <div class="card">
+        <div class="card__header">
+            <h2 class="card__title">Comprobante de Pago</h2>
+        </div>
+        <div class="card__body">
+            {% if cita.comprobante_pago %}
+            <a href="{{ cita.comprobante_pago.url }}"
+               target="_blank"
+               class="btn btn--outline btn--full"
+               id="btn-ver-comprobante">
+                📎 Ver Comprobante
+            </a>
+            {% else %}
+            <p class="text-muted">No se adjuntó comprobante.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Formulario de aprobación/rechazo -->
+<div class="card mt-4">
+    <div class="card__header">
+        <h2 class="card__title">Decisión del Administrador</h2>
+    </div>
+    <div class="card__body">
+        <form method="post" action="{% url 'citas:aprobar_cita' cita.pk %}" id="form-aprobacion">
+            {% csrf_token %}
+            <div class="form-group">
+                <label class="form-label" for="notas-admin">Notas (opcional)</label>
+                <textarea id="notas-admin" name="notas" class="form-input" rows="3"
+                          placeholder="Observaciones para el paciente..."></textarea>
+            </div>
+            <div class="form-actions">
+                <button type="submit" name="accion" value="CONFIRMAR"
+                        class="btn btn--success" id="btn-confirmar">
+                    ✅ Confirmar Cita
+                </button>
+                <button type="submit" name="accion" value="CANCELAR"
+                        class="btn btn--danger" id="btn-cancelar"
+                        onclick="return confirm('¿Está seguro de que desea cancelar esta cita?')">
+                    ❌ Cancelar Cita
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

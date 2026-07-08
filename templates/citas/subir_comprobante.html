@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Subir Comprobante — DentalCare Pro{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Subir Comprobante de Pago</h1>
+</div>
+
+<div class="form-card">
+    <div class="form-card__header">
+        <h2 class="form-card__title">Cita #{{ object.pk }}</h2>
+        <div class="cita-info">
+            <span>🩺 Dr. {{ object.doctor.get_full_name }}</span>
+            <span>📅 {{ object.fecha|date:"d/m/Y" }} a las {{ object.hora|time:"H:i" }}</span>
+        </div>
+    </div>
+
+    <div class="alert alert--info">
+        <strong>Instrucciones:</strong> Realice la transferencia al número de cuenta indicado
+        por el consultorio y luego suba la captura o PDF del comprobante.
+    </div>
+
+    <form method="post" action="{% url 'citas:subir_comprobante' object.pk %}"
+          enctype="multipart/form-data" class="auth-form" id="form-comprobante" novalidate>
+        {% csrf_token %}
+
+        {% for field in form %}
+        <div class="form-group">
+            <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.help_text %}<span class="form-hint">{{ field.help_text }}</span>{% endif %}
+            {% for error in field.errors %}<span class="form-error">{{ error }}</span>{% endfor %}
+        </div>
+        {% endfor %}
+
+        <div class="form-actions">
+            <a href="{% url 'citas:mis_citas' %}" class="btn btn--outline">Volver</a>
+            <button type="submit" class="btn btn--primary" id="btn-enviar-comprobante">
+                📤 Enviar a Revisión
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

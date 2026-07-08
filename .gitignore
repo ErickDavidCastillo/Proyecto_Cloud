@@ -1,0 +1,52 @@
+# =============================================================================
+# .gitignore — Consultorio Dental (Python/Django)
+# =============================================================================
+
+# Entorno virtual
+.venv/
+venv/
+env/
+ENV/
+
+# Variables de entorno (NUNCA subir al repositorio)
+.env
+*.env
+
+# Base de datos local de desarrollo
+db.sqlite3
+
+# Archivos de media (comprobantes de pago — no subir al repo)
+media/
+
+# Archivos de Python compilados
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+
+# Archivos estáticos recolectados (generados en build)
+staticfiles/
+
+# Paquete de despliegue
+deploy.zip
+*.zip
+
+# IDE y editores
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Logs
+*.log
+
+# Archivos de cobertura de tests
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Distribución
+dist/
+build/
+*.egg-info/

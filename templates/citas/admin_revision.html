@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Citas en Revisión — DentalCare Pro{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">{{ titulo }}</h1>
+    <span class="badge badge--en_revision">{{ citas|length }} pendiente(s)</span>
+</div>
+
+{% if citas %}
+<div class="table-container">
+    <table class="table" role="table" aria-label="Citas esperando aprobación">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Paciente</th>
+                <th scope="col">Doctor</th>
+                <th scope="col">Fecha</th>
+                <th scope="col">Hora</th>
+                <th scope="col">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for cita in citas %}
+            <tr>
+                <td>{{ cita.pk }}</td>
+                <td>{{ cita.paciente.get_full_name }}</td>
+                <td>Dr. {{ cita.doctor.get_full_name }}</td>
+                <td>{{ cita.fecha|date:"d/m/Y" }}</td>
+                <td>{{ cita.hora|time:"H:i" }}</td>
+                <td>
+                    <a href="{% url 'citas:aprobar_cita' cita.pk %}"
+                       class="btn btn--sm btn--primary"
+                       id="btn-revisar-{{ cita.pk }}">
+                        📋 Revisar
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="empty-state">
+    <div class="empty-state__icon" aria-hidden="true">✅</div>
+    <h2 class="empty-state__title">No hay citas pendientes de revisión</h2>
+    <p class="empty-state__desc">Todas las citas han sido procesadas.</p>
+</div>
+{% endif %}
+{% endblock %}

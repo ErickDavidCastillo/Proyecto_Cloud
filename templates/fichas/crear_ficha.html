@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Crear Ficha Clínica — DentalCare Pro{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Nueva Entrada de Historial Clínico</h1>
+</div>
+
+<div class="form-card">
+    <div class="form-card__header">
+        <h2 class="form-card__title">Registrar Atención Médica</h2>
+        <p class="form-card__subtitle">Complete los campos detallando el diagnóstico y tratamiento realizado.</p>
+    </div>
+
+    <form method="post" action="{% url 'fichas:crear_ficha' %}" class="auth-form" novalidate>
+        {% csrf_token %}
+
+        {% for field in form %}
+        <div class="form-group">
+            <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.help_text %}<span class="form-hint">{{ field.help_text }}</span>{% endif %}
+            {% for error in field.errors %}<span class="form-error">{{ error }}</span>{% endfor %}
+        </div>
+        {% endfor %}
+
+        <div class="form-actions">
+            <a href="{% url 'fichas:mis_fichas_doctor' %}" class="btn btn--outline">Volver</a>
+            <button type="submit" class="btn btn--primary" id="btn-crear-ficha-submit">
+                Guardar Ficha Clínica
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

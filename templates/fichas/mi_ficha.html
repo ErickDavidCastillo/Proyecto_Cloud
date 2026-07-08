@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}{{ titulo }} — DentalCare Pro{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">{{ titulo }}</h1>
+    <p class="page-subtitle">Historial de consultas y procedimientos recibidos</p>
+</div>
+
+{% if fichas %}
+<div class="table-container">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>Odontólogo</th>
+                <th>Diagnóstico</th>
+                <th>Tratamiento Realizado</th>
+                <th>Observaciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for ficha in fichas %}
+            <tr>
+                <td><strong>{{ ficha.fecha|date:"d/m/Y" }}</strong></td>
+                <td>Dr. {{ ficha.doctor.get_full_name }}</td>
+                <td>{{ ficha.diagnostico|linebreaks }}</td>
+                <td>{{ ficha.tratamiento_realizado|linebreaks }}</td>
+                <td>{{ ficha.observaciones|default:"-"|linebreaks }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="empty-state">
+    <div class="empty-state__icon" aria-hidden="true">📋</div>
+    <h2 class="empty-state__title">Historial Clínico Vacío</h2>
+    <p class="empty-state__desc">Aún no tiene registros médicos o fichas clínicas asociadas en nuestro consultorio.</p>
+</div>
+{% endif %}
+{% endblock %}

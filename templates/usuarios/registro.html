@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Registro de Paciente — DentalCare Pro{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+    <div class="auth-card auth-card--wide">
+        <div class="auth-card__header">
+            <div class="auth-card__icon" aria-hidden="true">👤</div>
+            <h1 class="auth-card__title">Registro de Paciente</h1>
+            <p class="auth-card__subtitle">Complete sus datos para crear su cuenta</p>
+        </div>
+
+        <form method="post" action="{% url 'usuarios:registro' %}" class="auth-form" id="form-registro" novalidate>
+            {% csrf_token %}
+
+            <div class="form-grid form-grid--2col">
+                {% for field in form %}
+                <div class="form-group {% if field.name == 'password1' or field.name == 'password2' %}form-group--full{% endif %}">
+                    <label class="form-label" for="{{ field.id_for_label }}">
+                        {{ field.label }}
+                        {% if field.field.required %}<span class="required" aria-hidden="true">*</span>{% endif %}
+                    </label>
+                    {{ field }}
+                    {% if field.help_text %}
+                        <span class="form-hint">{{ field.help_text }}</span>
+                    {% endif %}
+                    {% for error in field.errors %}
+                        <span class="form-error">{{ error }}</span>
+                    {% endfor %}
+                </div>
+                {% endfor %}
+            </div>
+
+            <button type="submit" class="btn btn--primary btn--full" id="btn-registrar">
+                Crear Cuenta
+            </button>
+        </form>
+
+        <div class="auth-card__divider">
+            <span>¿Ya tiene una cuenta?</span>
+        </div>
+        <a href="{% url 'usuarios:login' %}" class="btn btn--outline btn--full">
+            Iniciar Sesión
+        </a>
+    </div>
+</div>
+{% endblock %}

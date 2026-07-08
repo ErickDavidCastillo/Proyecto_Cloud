@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block title %}{{ titulo }} — DentalCare Pro{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">{{ titulo }}</h1>
+    <span class="text-muted">Dr. {{ request.user.get_full_name }}</span>
+</div>
+
+<div class="detail-grid">
+    <!-- Columna 1: Horarios de Trabajo -->
+    <div class="card">
+        <div class="card__header">
+            <h2 class="card__title">📅 Horarios Semanales</h2>
+        </div>
+        <div class="card__body">
+            {% if horarios %}
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Día</th>
+                            <th>Inicio</th>
+                            <th>Fin</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for horario in horarios %}
+                        <tr>
+                            <td><strong>{{ horario.get_dia_semana_display }}</strong></td>
+                            <td>{{ horario.hora_inicio|time:"H:i" }}</td>
+                            <td>{{ horario.hora_fin|time:"H:i" }}</td>
+                            <td>
+                                <form method="post" action="{% url 'agenda:eliminar_horario' horario.pk %}" style="display:inline;" onsubmit="return confirm('¿Eliminar este bloque de horario?');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn--sm btn--danger">Eliminar</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted">No ha definido bloques de horario semanal aún.</p>
+            {% endif %}
+
+            {% if citas_asignadas %}
+            <div class="mt-4">
+                <h3 class="card__title" style="font-size: 1.1rem; margin-bottom: var(--space-3);">Turnos asignados</h3>
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Paciente</th>
+                                <th>Fecha</th>
+                                <th>Hora</th>
+                                <th>Estado</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for cita in citas_asignadas %}
+                            <tr>
+                                <td>{{ cita.paciente.get_full_name }}</td>
+                                <td>{{ cita.fecha|date:"d/m/Y" }}</td>
+                                <td>{{ cita.hora|time:"H:i" }}</td>
+                                <td>{{ cita.get_estado_display }}</td>
+                                <td>
+                                    <a href="{% url 'fichas:crear_ficha' %}?paciente={{ cita.paciente.pk }}&cita={{ cita.pk }}" class="btn btn--sm btn--primary">
+                                        Atender cita
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Formulario para agregar horario -->
+            <div class="mt-4">
+                <h3 class="card__title" style="font-size: 1.1rem; margin-bottom: var(--space-3);">+ Agregar Horario</h3>
+                <form method="post" action="{% url 'agenda:crear_horario' %}" class="auth-form" style="padding:0;">
+                    {% csrf_token %}
+                    {% for field in form_horario %}
+                    <div class="form-group">
+                        <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% for error in field.errors %}<span class="form-error">{{ error }}</span>{% endfor %}
+                    </div>
+                    {% endfor %}
+                    <button type="submit" class="btn btn--primary btn--sm">Agregar Bloque</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Columna 2: Días Bloqueados (Vacaciones/Ausencias) -->
+    <div class="card">
+        <div class="card__header">
+            <h2 class="card__title">🚫 Días Bloqueados / Ausencias</h2>
+        </div>
+        <div class="card__body">
+            {% if dias_bloqueados %}
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Motivo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for db in dias_bloqueados %}
+                        <tr>
+                            <td>{{ db.fecha|date:"d/m/Y" }}</td>
+                            <td>{{ db.motivo }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted">No tiene días bloqueados registrados.</p>
+            {% endif %}
+
+            <!-- Formulario para bloquear día -->
+            <div class="mt-4">
+                <h3 class="card__title" style="font-size: 1.1rem; margin-bottom: var(--space-3);">+ Bloquear Día</h3>
+                <form method="post" action="{% url 'agenda:bloquear_dia' %}" class="auth-form" style="padding:0;">
+                    {% csrf_token %}
+                    {% for field in form_bloqueo %}
+                    <div class="form-group">
+                        <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% for error in field.errors %}<span class="form-error">{{ error }}</span>{% endfor %}
+                    </div>
+                    {% endfor %}
+                    <button type="submit" class="btn btn--warning btn--sm">Bloquear Fecha</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

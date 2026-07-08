@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Mis Citas — DentalCare Pro{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">{{ titulo }}</h1>
+    <a href="{% url 'citas:reservar_cita' %}" class="btn btn--primary" id="btn-nueva-cita">
+        + Nueva Cita
+    </a>
+</div>
+
+{% if citas %}
+<div class="table-container">
+    <table class="table" role="table" aria-label="Lista de mis citas">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Doctor</th>
+                <th scope="col">Fecha</th>
+                <th scope="col">Hora</th>
+                <th scope="col">Estado</th>
+                <th scope="col">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for cita in citas %}
+            <tr>
+                <td>{{ cita.pk }}</td>
+                <td>Dr. {{ cita.doctor.get_full_name }}</td>
+                <td>{{ cita.fecha|date:"d/m/Y" }}</td>
+                <td>{{ cita.hora|time:"H:i" }}</td>
+                <td>
+                    <span class="badge badge--{{ cita.estado|lower }}">
+                        {{ cita.get_estado_display }}
+                    </span>
+                </td>
+                <td>
+                    {% if cita.estado == 'PENDIENTE_PAGO' %}
+                    <a href="{% url 'citas:subir_comprobante' cita.pk %}"
+                       class="btn btn--sm btn--warning"
+                       id="btn-comprobante-{{ cita.pk }}">
+                        📤 Subir Pago
+                    </a>
+                    {% elif cita.estado == 'EN_REVISION' %}
+                    <span class="text-muted">En revisión...</span>
+                    {% elif cita.estado == 'CONFIRMADA' %}
+                    <span class="text-success">✅ Confirmada</span>
+                    {% elif cita.estado == 'CANCELADA' %}
+                    <span class="text-danger">❌ Cancelada</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="empty-state">
+    <div class="empty-state__icon" aria-hidden="true">📅</div>
+    <h2 class="empty-state__title">No tiene citas agendadas</h2>
+    <p class="empty-state__desc">Reserve su primera cita con uno de nuestros especialistas.</p>
+    <a href="{% url 'citas:reservar_cita' %}" class="btn btn--primary">Reservar ahora</a>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Reservar Cita — DentalCare Pro{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Reservar Nueva Cita</h1>
+</div>
+
+<div class="form-card">
+    <div class="form-card__header">
+        <h2 class="form-card__title">Seleccione su cita</h2>
+        <p class="form-card__subtitle">
+            Tras reservar, deberá subir el comprobante de transferencia para confirmar.
+        </p>
+    </div>
+
+    <form method="post" action="{% url 'citas:reservar_cita' %}" class="auth-form" id="form-reservar" novalidate>
+        {% csrf_token %}
+
+        {% for field in form %}
+        <div class="form-group">
+            <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.help_text %}<span class="form-hint">{{ field.help_text }}</span>{% endif %}
+            {% for error in field.errors %}<span class="form-error">{{ error }}</span>{% endfor %}
+        </div>
+        {% endfor %}
+
+        {% if form.non_field_errors %}
+        <div class="alert alert--error">
+            {% for error in form.non_field_errors %}
+            <p>{{ error }}</p>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="form-actions">
+            <a href="{% url 'citas:mis_citas' %}" class="btn btn--outline">Cancelar</a>
+            <button type="submit" class="btn btn--primary" id="btn-reservar-submit">
+                Reservar Cita
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
