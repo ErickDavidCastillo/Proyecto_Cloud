@@ -69,9 +69,13 @@
                                 <td>{{ cita.hora|time:"H:i" }}</td>
                                 <td>{{ cita.get_estado_display }}</td>
                                 <td>
-                                    <a href="{% url 'fichas:crear_ficha' %}?paciente={{ cita.paciente.pk }}&cita={{ cita.pk }}" class="btn btn--sm btn--primary">
-                                        Atender cita
-                                    </a>
+                                    {% if cita.atendida %}
+                                        <button class="btn btn--sm" disabled>Atendido</button>
+                                    {% else %}
+                                        <a href="{% url 'fichas:crear_ficha' %}?paciente={{ cita.paciente.pk }}&cita={{ cita.pk }}" class="btn btn--sm btn--primary">
+                                            Atender cita
+                                        </a>
+                                    {% endif %}
                                 </td>
                             </tr>
                             {% endfor %}

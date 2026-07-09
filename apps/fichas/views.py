@@ -6,6 +6,7 @@ from django.contrib.auth import get_user_model
 from django.views.generic import ListView, CreateView, DetailView
 from django.urls import reverse_lazy
 from django.contrib import messages
+from django.shortcuts import redirect
 
 from apps.usuarios.views import SoloOdontologoMixin, SoloPacienteMixin
 from .models import HistorialClinico
@@ -53,11 +54,32 @@ class CrearFichaView(SoloOdontologoMixin, CreateView):
     def form_valid(self, form):
         ficha = form.save(commit=False)
         ficha.doctor = self.request.user
+
+        # Vincular la ficha con la cita (si se proporcionó) y marcar la cita como atendida
+        cita_pk = self.request.GET.get('cita') or self.request.POST.get('cita')
+        if cita_pk:
+            try:
+                from apps.citas.models import Cita
+                cita = Cita.objects.get(pk=cita_pk)
+                ficha.cita = cita
+                # marcar atendida solo si el doctor coincide (seguridad básica)
+                if cita.doctor == self.request.user:
+                    cita.atendida = True
+                    cita.save()
+            except Exception:
+                # ignorar si no existe o error de validación
+                pass
+
         ficha.save()
         messages.success(
             self.request,
             f'Ficha clínica creada para {ficha.paciente.get_full_name()}.'
         )
+
+        # Si la ficha fue creada desde una cita, redirigir de vuelta al cronograma
+        if cita_pk:
+            return redirect('agenda:mi_cronograma')
+
         return super().form_valid(form)
 
 

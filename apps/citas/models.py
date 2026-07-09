@@ -106,6 +106,15 @@ class Cita(models.Model):
     )
 
     # -------------------------------------------------------------------------
+    # INDICA SI LA CITA YA FUE ATENDIDA POR EL ODONTÓLOGO
+    # -------------------------------------------------------------------------
+    atendida = models.BooleanField(
+        default=False,
+        verbose_name=_('Atendida'),
+        help_text=_('Marca si la cita ya fue atendida por el odontólogo.'),
+    )
+
+    # -------------------------------------------------------------------------
     # META
     # -------------------------------------------------------------------------
     class Meta:

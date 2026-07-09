@@ -1,0 +1,15 @@
+{% load i18n admin_urls %}
+<div class="submit-row">
+{% block submit_row %}
+{% if show_previsualizar %}<input type="submit" value="{% translate 'Preview' %}" name="_preview">{% endif %}
+{% if show_save %}<input type="submit" value="{% translate 'Save' %}" class="default" name="_save">{% endif %}
+{% if show_delete_link and view_on_site_url %}
+    <p class="deletelink-box"><a href="{% url opts|admin_urlname:'delete' original.pk|admin_urlquote %}" class="deletelink">{% translate "Delete" %}</a></p>
+{% endif %}
+
+<!-- Botón Cancelar personalizado que regresa a la página anterior -->
+<a href="#" onclick="window.history.back(); return false;" class="button" style="background: #417690; color: white; margin-left: 8px; display: inline-block; padding: 10px 15px; border-radius: 4px; text-decoration: none; font-weight: bold;">
+    Cancelar
+</a>
+{% endblock %}
+</div>

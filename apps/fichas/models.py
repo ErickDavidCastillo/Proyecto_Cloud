@@ -50,6 +50,15 @@ class HistorialClinico(models.Model):
         auto_now_add=True,
         verbose_name=_('Fecha de registro'),
     )
+    cita = models.ForeignKey(
+        'citas.Cita',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='fichas_clinicas',
+        verbose_name=_('Cita relacionada'),
+        help_text=_('Referencia opcional a la cita atendida.'),
+    )
 
     class Meta:
         verbose_name = _('Historial clínico')

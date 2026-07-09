@@ -16,6 +16,11 @@
     <form method="post" action="{% url 'fichas:crear_ficha' %}" class="auth-form" novalidate>
         {% csrf_token %}
 
+        {# Preserve cita id from querystring so POST includes it #}
+        {% if request.GET.cita %}
+            <input type="hidden" name="cita" value="{{ request.GET.cita }}" />
+        {% endif %}
+
         {% for field in form %}
         <div class="form-group">
             <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
