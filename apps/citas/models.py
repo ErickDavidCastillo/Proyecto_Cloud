@@ -144,6 +144,7 @@ class Cita(models.Model):
         self._validar_no_duplicado_doctor()
         self._validar_no_duplicado_paciente()
         self._validar_comprobante_al_cambiar_estado()
+        self._validar_disponibilidad_agenda()
 
     def _validar_no_duplicado_doctor(self):
         """
@@ -209,6 +210,82 @@ class Cita(models.Model):
                 'comprobante_pago': _(
                     'Debe adjuntar el comprobante de pago para enviar a revisión.'
                 )
+            })
+
+    def _validar_disponibilidad_agenda(self):
+        """
+        Valida que la cita se ajuste a la disponibilidad de agenda del odontólogo:
+        - No en días bloqueados
+        - En días donde el doctor trabaja
+        - Dentro del rango horario del doctor para ese día
+        """
+        # Si la cita está cancelada, no validar agenda
+        if self.estado == self.Estado.CANCELADA:
+            return
+
+        # Import local para evitar dependencias circulares
+        from apps.agenda.models import HorarioTrabajo, DiaBloqueado
+
+        # REGLA A: Verificar días bloqueados
+        if DiaBloqueado.objects.filter(
+            doctor=self.doctor,
+            fecha=self.fecha
+        ).exists():
+            raise ValidationError({
+                'fecha': _(
+                    'El odontólogo no está disponible el %(fecha)s '
+                    '(ausencia o día bloqueado).'
+                ) % {'fecha': self.fecha.strftime('%d/%m/%Y')}
+            })
+
+        # Obtener el día de la semana (0=Lunes, 6=Domingo)
+        dia_semana = self.fecha.weekday()
+
+        # REGLA B: Verificar que el doctor trabaje ese día de la semana
+        horarios_dia = HorarioTrabajo.objects.filter(
+            doctor=self.doctor,
+            dia_semana=dia_semana
+        )
+
+        if not horarios_dia.exists():
+            dias_semana_map = {
+                0: 'Lunes',
+                1: 'Martes',
+                2: 'Miércoles',
+                3: 'Jueves',
+                4: 'Viernes',
+                5: 'Sábado',
+                6: 'Domingo',
+            }
+            nombre_dia = dias_semana_map.get(dia_semana, 'Este día')
+
+            raise ValidationError({
+                'fecha': _(
+                    'El odontólogo no tiene horarios configurados para %(dia)s.'
+                ) % {'dia': nombre_dia}
+            })
+
+        # REGLA C: Verificar que la hora esté dentro del rango de trabajo
+        hora_en_rango = horarios_dia.filter(
+            hora_inicio__lte=self.hora,
+            hora_fin__gt=self.hora
+        ).exists()
+
+        if not hora_en_rango:
+            # Construir mensaje con los horarios disponibles
+            horarios_str = ', '.join([
+                f'{h.hora_inicio.strftime("%H:%M")}-{h.hora_fin.strftime("%H:%M")}'
+                for h in horarios_dia.order_by('hora_inicio')
+            ])
+
+            raise ValidationError({
+                'hora': _(
+                    'La hora %(hora)s no está disponible. '
+                    'Horarios disponibles: %(horarios)s'
+                ) % {
+                    'hora': self.hora.strftime('%H:%M'),
+                    'horarios': horarios_str
+                }
             })
 
     # -------------------------------------------------------------------------

@@ -18,7 +18,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config('SECRET_KEY')
 DEBUG = config('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=Csv())
+# Hosts permitidos (separados por coma en variable de entorno)
+# Ejemplo local: localhost,127.0.0.1
+# Ejemplo Azure: localhost,127.0.0.1,mi-app.azurewebsites.net
+ALLOWED_HOSTS = config(
+    'ALLOWED_HOSTS',
+    default='localhost,127.0.0.1',
+    cast=Csv()
+)
 
 # =============================================================================
 # APLICACIONES INSTALADAS
