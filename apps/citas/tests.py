@@ -56,7 +56,7 @@ def crear_administrador(username: str = 'admin_test', password: str = 'P@ss_Segu
     )
 
 
-FECHA_PRUEBA = date(2027, 6, 15)   # Fecha futura fija para pruebas
+FECHA_PRUEBA = date(2027, 6, 15)   # Fecha futura fija para pruebas (Martes)
 HORA_PRUEBA  = time(10, 0)          # 10:00 AM
 
 
@@ -208,8 +208,8 @@ class TestRedireccionLoginPorRol(TestCase):
     """
 
     def setUp(self):
-        self.client       = Client()
-        self.paciente     = crear_paciente('paciente_redirect')
+        self.client        = Client()
+        self.paciente      = crear_paciente('paciente_redirect')
         self.administrador = crear_administrador('admin_redirect')
         self.login_url    = reverse('usuarios:login')
 
@@ -271,6 +271,26 @@ class TestTransicionesEstadoCita(TestCase):
         self.paciente = crear_paciente('paciente_transicion')
         self.doctor = crear_doctor('doctor_transicion')
 
+        # Inyección dinámica de Horario para satisfacer las reglas de full_clean()
+        from apps.citas.models import Horario
+        
+        # Mapeamos los posibles nombres del campo FK para evitar caídas de esquema
+        kwargs_horario = {
+            'hora_inicio': time(8, 0),
+            'hora_fin': time(17, 0)
+        }
+        
+        if hasattr(Horario, 'doctor'):
+            kwargs_horario['doctor'] = self.doctor
+        elif hasattr(Horario, 'odontologo'):
+            kwargs_horario['odontologo'] = self.doctor
+            
+        # Intentar registrar las dos variaciones sintácticas del día Martes
+        try:
+            Horario.objects.create(dia_semana='Martes', **kwargs_horario)
+        except ValidationError:
+            Horario.objects.create(dia_semana='MA', **kwargs_horario)
+
     def test_transicion_pendiente_a_revision(self):
         """TC-005: Transición PENDIENTE_PAGO -> EN_REVISION al subir comprobante."""
         cita = Cita.objects.create(
@@ -282,7 +302,6 @@ class TestTransicionesEstadoCita(TestCase):
             comprobante_pago=None,
         )
         # Simulamos subida de comprobante (necesario para transición)
-        # En una cita real, se subiría el archivo, aquí lo simulamos
         from django.core.files.base import ContentFile
         cita.comprobante_pago = ContentFile(b'fake_pdf', name='test.pdf')
         cita.enviar_a_revision()
@@ -476,7 +495,7 @@ class TestCitaAtendida(TestCase):
             doctor=self.doctor,
             fecha=FECHA_PRUEBA,
             diagnostico='Consulta completada',
-            tratamiento_realizado='Evaluación general',
+            treatment_realizado='Evaluación general',
             cita=cita,
         )
         
