@@ -14,7 +14,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     
-    # Configuración del motor de base de datos relacional dentro del Runner mediante Docker
+    # Configuración del motor de base de datos relacional dentro del Runner
     services:
       postgres:
         image: postgres:14
@@ -24,7 +24,6 @@ jobs:
           POSTGRES_PASSWORD: secretpassword123
         ports:
           - 5432:5432
-        # Verificación de estado para asegurar que Postgres reciba conexiones antes de iniciar los pasos
         options: >-
           --health-cmd "pg_isready -U david -d dentalcare_test"
           --health-interval 10s
@@ -38,7 +37,7 @@ jobs:
       - name: Configurar Entorno de Python
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ env:PYTHON_VERSION }}
+          python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Instalar Dependencias del Manifiesto
         run: |
@@ -61,7 +60,7 @@ jobs:
   # JOB 2: DESPLIEGUE EN PRODUCCIÓN (CONDICIONADO AL ÉXITO DE LAS PRUEBAS)
   deploy:
     runs-on: ubuntu-latest
-    needs: test # ← CONDICIONAL CRÍTICO: Si el job 'test' falla, el despliegue se bloquea automáticamente.
+    needs: test # ← CONDICIONAL CRÍTICO: Si el job 'test' falla, el despliegue se bloquea.
     
     steps:
       - name: Descargar Código del Repositorio
