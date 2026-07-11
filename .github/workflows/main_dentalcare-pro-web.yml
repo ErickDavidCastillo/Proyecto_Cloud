@@ -52,8 +52,8 @@ jobs:
           DB_PASSWORD: secretpassword123
           DB_HOSTNAME: localhost
           DB_PORT: 5432
-          PGSSLMODE: disable       # ← NUEVO: Evita que psycopg2 exija SSL al contenedor local
-          DB_SSLMODE: disable      # ← NUEVO: Apaga de forma segura el sslmode en settings.py
+          PGSSLMODE: disable       # Evita que psycopg2 exija SSL al contenedor local
+          DB_SSLMODE: disable      # Apaga de forma segura el sslmode en settings.py
           SECRET_KEY: test_secret_key_ci_cd
           DEBUG: 'True'
         run: |
@@ -68,8 +68,14 @@ jobs:
       - name: Descargar Código del Repositorio
         uses: actions/checkout@v4
 
+      # Login con las credenciales (Azure Login) usando el secreto AZURE_CREDENTIALS
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      # Despliegue en Azure App Service
       - name: Desplegar Aplicación en Azure App Service
         uses: azure/webapps-deploy@v3
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
