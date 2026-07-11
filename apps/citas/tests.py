@@ -9,7 +9,7 @@ from django.urls import reverse
 
 from apps.usuarios.models import Usuario
 from apps.citas.models import Cita
-from apps.agenda.models import HorarioTrabajo  # Importación corregida
+from apps.agenda.models import HorarioTrabajo
 
 # =============================================================================
 # HELPERS REUTILIZABLES
@@ -182,13 +182,13 @@ class TestCitaAtendida(TestCase):
         from apps.fichas.models import HistorialClinico
         cita = Cita.objects.create(paciente=self.paciente, doctor=self.doctor, fecha=FECHA_PRUEBA, hora=HORA_PRUEBA, estado=Cita.Estado.CONFIRMADA, atendida=True)
         
-        # AJUSTA 'tratamiento' si en tu modelo se llama diferente
+        # Campo corregido: tratamiento_realizado
         ficha = HistorialClinico.objects.create(
             paciente=self.paciente,
             doctor=self.doctor,
             fecha=FECHA_PRUEBA,
             diagnostico='Consulta completada',
-            tratamiento='Evaluación general', 
+            tratamiento_realizado='Evaluación general', 
             cita=cita,
         )
         self.assertEqual(cita.fichas_clinicas.first(), ficha)
