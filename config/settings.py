@@ -99,7 +99,7 @@ if DB_HOSTNAME:
             'HOST': DB_HOSTNAME,
             'PORT': config('DB_PORT', default='5432'),
             'OPTIONS': {
-                'sslmode': 'require',
+                'sslmode': config('DB_SSLMODE', default='require'), # ← Cambio dinámico para pruebas
             },
             'CONN_MAX_AGE': 60,
         }
