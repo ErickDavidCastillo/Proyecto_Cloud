@@ -165,13 +165,16 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # RUTAS DE AUTENTICACIÓN
 # =============================================================================
 LOGIN_URL = '/auth/login/'
-LOGIN_REDIRECT_URL = '/'      # Sobrescrito por lógica de rol en la vista
+LOGIN_REDIRECT_URL = '/'    # Sobrescrito por lógica de rol en la vista
 LOGOUT_REDIRECT_URL = '/auth/login/'
 
 # =============================================================================
 # SEGURIDAD ADICIONAL (Producción)
 # =============================================================================
 if not DEBUG:
+    # Solución para redirecciones infinitas en Azure
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    
     SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
