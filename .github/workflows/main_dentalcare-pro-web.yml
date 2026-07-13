@@ -56,6 +56,8 @@ jobs:
           DB_SSLMODE: disable      # Apaga de forma segura el sslmode en settings.py
           SECRET_KEY: test_secret_key_ci_cd
           DEBUG: 'True'
+          # Variable corregida para que el test pueda arrancar
+          AZURE_CONNECTION_STRING: ${{ secrets.AZURE_CONNECTION_STRING }}
         run: |
           python manage.py test
 
