@@ -4,13 +4,13 @@ Modelo de Cita con Máquina de Estados y manejo de comprobante de pago.
 Estados del ciclo de vida de una cita:
 ┌─────────────────┐     sube comprobante     ┌────────────┐
 │ PENDIENTE_PAGO  │ ─────────────────────── ▶ │ EN_REVISION │
-└─────────────────┘                            └──────┬─────┘
-                                                      │
-                               ┌──────────────────────┤
-                               ▼                      ▼
-                         ┌──────────┐          ┌──────────┐
-                         │CONFIRMADA│          │ CANCELADA│
-                         └──────────┘          └──────────┘
+└─────────────────┘                         └──────┬─────┘
+                                                   │
+                                ┌──────────────────┤
+                                ▼                  ▼
+                          ┌──────────┐       ┌──────────┐
+                          │CONFIRMADA│       │ CANCELADA│
+                          └──────────┘       └──────────┘
 
 Reglas de negocio implementadas mediante constraints de base de datos:
 1. Un doctor no puede tener dos citas CONFIRMADAS en el mismo slot de tiempo.
@@ -219,8 +219,8 @@ class Cita(models.Model):
         - En días donde el doctor trabaja
         - Dentro del rango horario del doctor para ese día
         """
-        # Si la cita está cancelada, no validar agenda
-        if self.estado == self.Estado.CANCELADA:
+        # CORRECCIÓN: Si está cancelada o falta la fecha, no validamos agenda
+        if self.estado == self.Estado.CANCELADA or not self.fecha:
             return
 
         # Import local para evitar dependencias circulares
