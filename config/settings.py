@@ -35,7 +35,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'storages', # <--- AGREGA ESTA LÍNEA
+    'storages',
 
     'apps.usuarios',
     'apps.agenda',
@@ -107,7 +107,7 @@ else:
     }
 
 # =============================================================================
-# SESIONES, USUARIOS, INTERNACIONALIZACIÓN (SIN CAMBIOS)
+# SESIONES, USUARIOS, INTERNACIONALIZACIÓN
 # =============================================================================
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 SESSION_COOKIE_AGE = 86400
@@ -126,7 +126,6 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # =============================================================================
 # ARCHIVOS DE MEDIA (AZURE STORAGE)
@@ -138,7 +137,7 @@ STORAGES = {
         "BACKEND": "storages.backends.azure_storage.AzureStorage",
         "OPTIONS": {
             "azure_container": "media",
-            "connection_string": config('AZURE_CONNECTION_STRING'),
+            "connection_string": config('AZURE_CONNECTION_STRING', default='DefaultEndpointsProtocol=https;AccountName=dummy;AccountKey=dummy;EndpointSuffix=core.windows.net'),
         },
     },
     "staticfiles": {
