@@ -4,6 +4,7 @@ Configuración segura basada en variables de entorno (python-decouple).
 """
 
 import os
+import platform
 from pathlib import Path
 from decouple import config, Csv
 
@@ -18,9 +19,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config('SECRET_KEY')
 DEBUG = config('DEBUG', default=False, cast=bool)
 
-# Hosts permitidos (separados por coma en variable de entorno)
-# Ejemplo local: localhost,127.0.0.1
-# Ejemplo Azure: localhost,127.0.0.1,mi-app.azurewebsites.net
+# Hosts permitidos
 ALLOWED_HOSTS = config(
     'ALLOWED_HOSTS',
     default='localhost,127.0.0.1',
@@ -99,7 +98,7 @@ if DB_HOSTNAME:
             'HOST': DB_HOSTNAME,
             'PORT': config('DB_PORT', default='5432'),
             'OPTIONS': {
-                'sslmode': config('DB_SSLMODE', default='require'), # ← Cambio dinámico para pruebas
+                'sslmode': config('DB_SSLMODE', default='require'),
             },
             'CONN_MAX_AGE': 60,
         }
@@ -114,8 +113,7 @@ else:
     }
 
 # =============================================================================
-# SESIONES PERSISTENTES EN BASE DE DATOS
-# (Evita pérdida de sesiones en reinicios de Azure App Service)
+# SESIONES PERSISTENTES
 # =============================================================================
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 SESSION_COOKIE_AGE = 86400          # 24 horas en segundos
@@ -159,22 +157,25 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 # ARCHIVOS DE MEDIA (Comprobantes de pago)
 # =============================================================================
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+
+# Lógica dinámica para almacenamiento persistente en Azure
+if platform.system() == 'Linux' and os.path.exists('/home/site/wwwroot'):
+    MEDIA_ROOT = '/home/site/wwwroot/media'
+else:
+    MEDIA_ROOT = BASE_DIR / 'media'
 
 # =============================================================================
 # RUTAS DE AUTENTICACIÓN
 # =============================================================================
 LOGIN_URL = '/auth/login/'
-LOGIN_REDIRECT_URL = '/'    # Sobrescrito por lógica de rol en la vista
+LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/auth/login/'
 
 # =============================================================================
 # SEGURIDAD ADICIONAL (Producción)
 # =============================================================================
 if not DEBUG:
-    # Solución para redirecciones infinitas en Azure
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-    
     SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
