@@ -31,7 +31,9 @@ urlpatterns = [
     path('dashboard/', include('apps.usuarios.dashboard_urls', namespace='dashboard')),
 ]
 
-# Servir archivos de media en desarrollo
+# Servir archivos de media (incluso en producción)
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+# Servir estáticos solo en desarrollo (ya que WhiteNoise los maneja en producción)
 if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
