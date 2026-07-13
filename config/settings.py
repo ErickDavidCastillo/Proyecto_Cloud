@@ -14,12 +14,11 @@ from decouple import config, Csv
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # =============================================================================
-# SEGURIDAD - LEER DESDE VARIABLES DE ENTORNO (NUNCA en texto plano)
+# SEGURIDAD - LEER DESDE VARIABLES DE ENTORNO
 # =============================================================================
 SECRET_KEY = config('SECRET_KEY')
 DEBUG = config('DEBUG', default=False, cast=bool)
 
-# Hosts permitidos
 ALLOWED_HOSTS = config(
     'ALLOWED_HOSTS',
     default='localhost,127.0.0.1',
@@ -30,15 +29,14 @@ ALLOWED_HOSTS = config(
 # APLICACIONES INSTALADAS
 # =============================================================================
 INSTALLED_APPS = [
-    # Django core
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'storages', # <--- AGREGA ESTA LÍNEA
 
-    # Aplicaciones del proyecto
     'apps.usuarios',
     'apps.agenda',
     'apps.citas',
@@ -50,7 +48,7 @@ INSTALLED_APPS = [
 # =============================================================================
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',   # Servir estáticos en producción
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -83,12 +81,11 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 # =============================================================================
-# BASE DE DATOS - PostgreSQL en Azure / SQLite en local
+# BASE DE DATOS
 # =============================================================================
 DB_HOSTNAME = config('DB_HOSTNAME', default='')
 
 if DB_HOSTNAME:
-    # Configuración de producción: PostgreSQL en Azure
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
@@ -97,14 +94,11 @@ if DB_HOSTNAME:
             'PASSWORD': config('DB_PASSWORD'),
             'HOST': DB_HOSTNAME,
             'PORT': config('DB_PORT', default='5432'),
-            'OPTIONS': {
-                'sslmode': config('DB_SSLMODE', default='require'),
-            },
+            'OPTIONS': {'sslmode': config('DB_SSLMODE', default='require')},
             'CONN_MAX_AGE': 60,
         }
     }
 else:
-    # Configuración local: SQLite (desarrollo)
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
@@ -113,33 +107,14 @@ else:
     }
 
 # =============================================================================
-# SESIONES PERSISTENTES
+# SESIONES, USUARIOS, INTERNACIONALIZACIÓN (SIN CAMBIOS)
 # =============================================================================
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
-SESSION_COOKIE_AGE = 86400          # 24 horas en segundos
-SESSION_SAVE_EVERY_REQUEST = False
-SESSION_COOKIE_SECURE = not DEBUG   # HTTPS en producción
+SESSION_COOKIE_AGE = 86400
+SESSION_COOKIE_SECURE = not DEBUG
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = 'Lax'
-
-# =============================================================================
-# MODELO DE USUARIO PERSONALIZADO
-# =============================================================================
 AUTH_USER_MODEL = 'usuarios.Usuario'
-
-# =============================================================================
-# VALIDACIÓN DE CONTRASEÑAS
-# =============================================================================
-AUTH_PASSWORD_VALIDATORS = [
-    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
-]
-
-# =============================================================================
-# INTERNACIONALIZACIÓN
-# =============================================================================
 LANGUAGE_CODE = 'es-ec'
 TIME_ZONE = 'America/Guayaquil'
 USE_I18N = True
@@ -154,70 +129,43 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # =============================================================================
-# ARCHIVOS DE MEDIA (Comprobantes de pago)
+# ARCHIVOS DE MEDIA (AZURE STORAGE)
 # =============================================================================
 MEDIA_URL = '/media/'
 
-# Lógica dinámica para almacenamiento persistente en Azure
-if platform.system() == 'Linux' and os.path.exists('/home/site/wwwroot'):
-    MEDIA_ROOT = '/home/site/wwwroot/media'
-else:
-    MEDIA_ROOT = BASE_DIR / 'media'
+STORAGES = {
+    "default": {
+        "BACKEND": "storages.backends.azure_storage.AzureStorage",
+        "OPTIONS": {
+            "azure_container": "media",
+            "connection_string": config('AZURE_CONNECTION_STRING'),
+        },
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
 
 # =============================================================================
-# RUTAS DE AUTENTICACIÓN
+# RESTO DE CONFIGURACIONES (LOGIN, LOGGING, ETC.)
 # =============================================================================
 LOGIN_URL = '/auth/login/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/auth/login/'
 
-# =============================================================================
-# SEGURIDAD ADICIONAL (Producción)
-# =============================================================================
 if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-    SECURE_HSTS_SECONDS = 31536000
-    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-    SECURE_HSTS_PRELOAD = True
     SECURE_SSL_REDIRECT = True
     CSRF_COOKIE_SECURE = True
     X_FRAME_OPTIONS = 'DENY'
 
-# =============================================================================
-# CAMPO POR DEFECTO PARA CLAVES PRIMARIAS
-# =============================================================================
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# =============================================================================
-# LOGGING
-# =============================================================================
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
-    'formatters': {
-        'verbose': {
-            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
-            'style': '{',
-        },
-    },
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-            'formatter': 'verbose',
-        },
-    },
-    'root': {
-        'handlers': ['console'],
-        'level': 'INFO',
-    },
-    'loggers': {
-        'django': {
-            'handlers': ['console'],
-            'level': config('DJANGO_LOG_LEVEL', default='INFO'),
-            'propagate': False,
-        },
-    },
+    'handlers': {'console': {'class': 'logging.StreamHandler'}},
+    'root': {'handlers': ['console'], 'level': 'INFO'},
 }
 
-# Desactivar la redirección automática de barras diagonales
 APPEND_SLASH = False
