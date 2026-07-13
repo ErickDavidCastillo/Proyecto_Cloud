@@ -217,3 +217,6 @@ LOGGING = {
         },
     },
 }
+
+# Desactivar la redirección automática de barras diagonales
+APPEND_SLASH = False
