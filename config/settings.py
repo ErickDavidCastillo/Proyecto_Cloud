@@ -138,6 +138,7 @@ STORAGES = {
         "OPTIONS": {
             "azure_container": "media",
             "connection_string": config('AZURE_CONNECTION_STRING', default='DefaultEndpointsProtocol=https;AccountName=dummy;AccountKey=dummy;EndpointSuffix=core.windows.net'),
+            "azure_query_auth": True,  # Habilitado para generar firmas SAS
         },
     },
     "staticfiles": {
