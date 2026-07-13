@@ -8,6 +8,7 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.views.generic import RedirectView
+from django.views.static import serve  # Import necesario para servir media en producción
 
 urlpatterns = [
     path('', RedirectView.as_view(url='/auth/login/', permanent=False)),
@@ -31,8 +32,12 @@ urlpatterns = [
     path('dashboard/', include('apps.usuarios.dashboard_urls', namespace='dashboard')),
 ]
 
-# Servir archivos de media (incluso en producción)
-urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# Servir archivos de media (forzado en producción mediante serve)
+urlpatterns += [
+    path('media/<path:path>/', serve, {
+        'document_root': settings.MEDIA_ROOT,
+    }),
+]
 
 # Servir estáticos solo en desarrollo (ya que WhiteNoise los maneja en producción)
 if settings.DEBUG:
