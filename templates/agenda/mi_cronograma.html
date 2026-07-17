@@ -72,8 +72,8 @@
                                     {% if cita.atendida %}
                                         <button class="btn btn--sm" disabled>Atendido</button>
                                     {% else %}
-                                        <a href="{% url 'fichas:crear_ficha' %}?paciente={{ cita.paciente.pk }}&cita={{ cita.pk }}" class="btn btn--sm btn--primary">
-                                            Atender cita
+                                        <a href="{% url 'fichas:crear_ficha' %}?paciente={{ cita.paciente.pk }}&cita={{ cita.pk }}" class="btn btn--sm" style="background-color: #f77f00 !important; border-color: #f77f00 !important; color: white !important; font-weight: bold;">
+                                           Atender cita
                                         </a>
                                     {% endif %}
                                 </td>
